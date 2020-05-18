@@ -13,6 +13,7 @@ import sys
 import os.path
 from collections import OrderedDict
 import shutil
+import argparse
 
 class MultiOrderedDict(OrderedDict):
     def __setitem__(self, key, value):
@@ -96,11 +97,13 @@ class OssecTester(object):
             sys.stdout.write(".")
             sys.stdout.flush()
 
-    def run(self, selective_test=False):
+    def run(self, selective_test=False, geoip=None):
         for aFile in os.listdir(self._test_path):
             aFile = os.path.join(self._test_path, aFile)
             if aFile.endswith(".ini"):
                 if selective_test and not aFile.endswith(selective_test):
+                    continue
+                if aFile == os.path.join(self._test_path,"static_filters_geoip.ini") and geoip is None:
                     continue
                 print "- [ File = %s ] ---------" % (aFile)
                 tGroup = ConfigParser.RawConfigParser(dict_type=MultiOrderedDict)
@@ -127,6 +130,11 @@ class OssecTester(object):
             sys.exit(1)
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description='This script tests Wazuh rules.')
+    parser.add_argument('--geoip', '-g', help='Use \'-g True\' to enable geoip tests (default: None)')
+    args = parser.parse_args()
+    geoip = args.geoip
+
     if len(sys.argv) == 2:
         selective_test = sys.argv[1]
         if not selective_test.endswith('.ini'):
@@ -138,5 +146,5 @@ if __name__ == "__main__":
         getOssecConfig(ossec_init, initconfigpath)
         provisionDR(ossec_init["DIRECTORY"])
         OT = OssecTester(ossec_init["DIRECTORY"])
-        OT.run(selective_test)
+        OT.run(selective_test, geoip)
         cleanDR(ossec_init["DIRECTORY"])
