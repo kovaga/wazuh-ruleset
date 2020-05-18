@@ -72,7 +72,7 @@
 
   <rule id="60007" level="0">
     <if_sid>60002</if_sid>
-    <field name="win.system.providerName">^Eventlog$</field>
+    <field name="win.system.providerName">^Microsoft-Windows-Eventlog$</field>
     <options>no_full_log</options>
     <description>Group of rules for Windows Eventlog</description>
   </rule>
